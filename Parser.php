@@ -24,6 +24,11 @@
  */
 namespace Novutec\WhoisParser;
 
+
+
+
+require_once 'Repartiteur/repartiteur.php';
+
 /**
  * @see Result/Result
  */
@@ -54,6 +59,12 @@ use Novutec\WhoisParser\Templates\Type\AbstractTemplate;
  */
 class Parser
 {
+	
+	
+	public $Repartiteur;
+	
+	public $attempt = 0;
+	
 
     /**
      * WhoisParserConfig object
@@ -158,6 +169,7 @@ class Parser
     public function __construct($format = 'object')
     {
         $this->setFormat($format);
+		$this->Repartiteur = new Repartiteur();
     }
 
     /**
@@ -180,11 +192,11 @@ class Parser
 	 * @param  string $query
 	 * @return object
 	 */
-    public function lookup($query = '')
+    public function lookup($query = '', $sortie = null)
     {
         $this->Result = new Result();
         $this->Config = new Config($this->specialWhois, $this->customConfigFile);
-        
+		
         try {
             if ($query == '') {
                 throw new NoQueryException('No lookup query given');
@@ -205,8 +217,24 @@ class Parser
                     $config = $this->Config->get('iana');
                 }
             }
-            
+			
+			/* on va utiliser notre répartiteur !
+			if ($sortie === null)
+			{
+				print_r("SELECTION D'UN CANDIDAT".PHP_EOL);
+				$server = $config['server'];
+				$sortie = $this->Repartiteur->get_candidate_easy($server);
+				if ($sortie === false)
+				{
+					print_r("PLUS DE CANDIDATS!");
+					die();
+				}
+			}
+			*/
+			
+			$config['sortie'] = $sortie;
             $this->Config->setCurrent($config);
+			// appel
             $this->call();
         } catch (AbstractException $e) {
             if ($this->throwExceptions) {
@@ -228,6 +256,9 @@ class Parser
             }
         }
         
+		$this->Result->addItem('sortie', $this->Config->current['sortie']);
+		$this->Result->addItem('attempt', $this->attempt);
+		
         // call cleanUp method
         $this->Result->cleanUp($this->Config->getCurrent(), $this->dateformat);
         
@@ -286,17 +317,44 @@ class Parser
 	 */
     public function call($query = '')
     {
+		$this->attempt++;
+
+
+		
+		if ($this->attempt > 5) throw new RateLimitException("STOP");
+		
         if ($query != '') {
             $this->Query = filter_var($query, FILTER_SANITIZE_STRING);
         }
         
         $Config = $this->Config->getCurrent();
+				
+		// on va utiliser notre répartiteur !
+		if ($Config['sortie'] === null)
+		{
+			$server = $Config['server'];
+			//print_r("SELECTION CANDIDAT");
+			$Config['sortie'] = $this->Repartiteur->get_candidate_easy($server);
+			if ($Config['sortie'] === null)
+			{
+				die('No moar candidates.');
+			}
+			
+		}
+		$this->Config->setCurrent($Config);
+		
+		// on historise dans notre répartiteur
+		$this->Repartiteur->log_query($Config['sortie'], $Config['server']);
+		
+		
         $Adapter = AbstractAdapter::factory($Config['adapter'], $this->proxyConfigFile, $this->customAdapterNamespace);
         $server = $Config['server'];
 
+		/*
         if (in_array($server, $this->rateLimitedServers)) {
-            throw new RateLimitException("Rate limit exceeded for server: ". $server);
+            throw new RateLimitException("Rate limit exceeded for server ". $server);
         }
+		*/
 
         if ($Adapter instanceof AbstractAdapter) {
             $this->rawdata = $Adapter->call($this->Query, $Config);
@@ -318,20 +376,36 @@ class Parser
         $Config = $this->Config->getCurrent();
 
         $Template = AbstractTemplate::factory($Config['template'], $this->customTemplateNamespace);
-
+		if (!$Template) {
+			  $Template = AbstractTemplate::factory('Standard', $this->customTemplateNamespace);
+			  $Config['template'] = 'Standard';
+		}
         // If Template is null then we do not have a template for that, but we
         // can still proceed to the end with just the rawdata
-        if ($Template instanceof AbstractTemplate) {
+        //if ($Template instanceof AbstractTemplate) {
             $this->Result->template[$Config['server']] = $Config['template'];
             $this->rawdata = $Template->translateRawData($this->rawdata, $Config);
             try {
                 $Template->parse($this->Result, $this->rawdata);
             } catch (RateLimitException $e) {
                 $server = $Config['server'];
-                if (!in_array($server, $this->rateLimitedServers)) {
+                /*
+				if (!in_array($server, $this->rateLimitedServers)) {
                     $this->rateLimitedServers[] = $server;
                 }
-                throw new RateLimitException("Rate limit exceeded for server: ". $server);
+				*/
+				$this->Repartiteur->action_suite_erreur ($Config['sortie'], $server);
+				//print_r("BL de ".$Config['sortie']." pour ".$server.PHP_EOL);
+				$Config['sortie'] = $sortie = null;
+				$this->Config->setCurrent($Config);
+				$this->call();
+				
+				
+                //throw new RateLimitException("Rate limit exceeded for server ". $server);
+				
+				
+				
+				
             }
             
             // set rawdata to Result - this happens here because sometimes we
@@ -359,9 +433,10 @@ class Parser
                 $this->Result->addItem('name', $this->Query->fqdn);
                 $this->Result->addItem('idnName', $this->Query->idnFqdn);
             }
-        } else {
-            throw new NoTemplateException('Template '. $Config['template'] .' could not be found');
-        }
+        //} 
+		//else {
+         //   throw new NoTemplateException('Template '. $Config['template'] .' could not be found');
+        //}
     }
 
     /**

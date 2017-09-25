@@ -35,6 +35,7 @@ namespace Novutec\WhoisParser\Result;
 class Result extends AbstractResult
 {
 
+	public $sortie;
     /**
      * Name of domain or IP address
      *
@@ -342,7 +343,7 @@ class Result extends AbstractResult
      */
     public function toJson()
     {
-        return json_encode($this->toArray());
+        return json_encode($this->toArray(), JSON_PRETTY_PRINT);
     }
 
     /**

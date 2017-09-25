@@ -82,6 +82,9 @@ class Cz extends Regex
      * @access protected
      */
     protected $available = '/no entries found/i';
+	
+	
+	protected $rateLimit = '/Your connection limit exceeded. Please slow down and try again later\./i';
 
     /**
      * After parsing ...

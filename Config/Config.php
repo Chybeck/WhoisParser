@@ -58,7 +58,7 @@ class Config
      * @var array
      * @access protected
      */
-    protected $current;
+    public $current;
 
     /**
 	 * Creates a WhoisParserConfig object and parses ini files for configuration.

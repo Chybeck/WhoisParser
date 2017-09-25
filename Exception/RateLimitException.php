@@ -34,4 +34,10 @@ namespace Novutec\WhoisParser\Exception;
  */
 class RateLimitException extends AbstractException
 {
+	
+	function __construct()
+	 {
+	 }
+	
+	
 }
