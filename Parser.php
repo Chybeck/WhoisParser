@@ -334,7 +334,7 @@ class Parser
 		{
 			$server = $Config['server'];
 			//print_r("SELECTION CANDIDAT");
-			$Config['sortie'] = $this->Repartiteur->get_candidate_easy($server);
+			$Config['sortie'] = $this->Repartiteur->get_candidate($server); 
 			if ($Config['sortie'] === null)
 			{
 				die('No moar candidates.');

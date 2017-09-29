@@ -3,13 +3,19 @@ namespace Novutec\WhoisParser;
 
 class Repartiteur
 {
+	private $db_ip;
+	private $db_login;
+	private $db_pass;
+	private $db_database;
 	private $mysqli;
 	public $server;
 	public $source;
-
+	
+	
 	  function __construct()
 	  {
-		 $this->mysqli = new \mysqli("127.0.0.1", "root", "qx2xcka", "repartiteur");
+		 include_once("./config.inc.php");
+		 $this->mysqli = new \mysqli($db_ip, $db_login, $db_pass, $db_database);
 	  }
 	  
 	 
@@ -29,9 +35,17 @@ class Repartiteur
 	  `ip_source` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL
 	) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+	
+	CREATE TABLE IF NOT EXISTS `whois_rate_limit` (
+	  `id` int(11) NOT NULL,
+	  `server` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+	  `whois_limit_amount` int(11) DEFAULT NULL,
+	  `whois_limit_period` int(11) DEFAULT NULL,
+	  `min_wait` int(11) DEFAULT NULL
+	) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;	
+	
 	*/
-
-
+	
 	public function get_candidate_easy($server) 
 	{
 		// selection d'un candidat en prenant le dernier utilisé pour ce serveur de whois.
@@ -73,6 +87,64 @@ class Repartiteur
 		return $this->mysqli->query($req);
 	}
 
+
+	
+	
+	function get_candidate($server) 
+	{
+		// selection d'un pool de sources candidates en triant par dernier candidat utilisé.
+		$req = "
+		SELECT * 
+		FROM `whois_candidates` c 
+		LEFT JOIN (
+		   SELECT source, MAX(Date) as date, server 
+		   FROM whois_query 
+		   WHERE server = '".$this->mysqli->real_escape_string($server)."'
+		   GROUP BY source 
+		) q ON q.source = c.ip_source
+		WHERE date < NOW() OR date IS NULL
+		ORDER BY date ASC
+		";
+		if (($pool = $this->mysqli->query($req)) === false) return null;
+		
+
+		
+		// selection des regles associés au serveur de whois
+		$req = "SELECT * from whois_rate_limit WHERE server = '".$this->mysqli->real_escape_string($server)."'";
+		print_r($req.PHP_EOL);
+		$rules = $this->mysqli->query($req);
+		if (($rule = $rules->fetch_object()) != null)
+		{		
+			// vérification des rules pour chaque candidat. On sort dès qu'on en trouve un bon.
+			while ($candidate = $pool->fetch_object()) {
+				
+
+				// etape 1 : on vérifie que pour ce candidat on a pas fait moins de whois_limit_amount dans la période de temps de whois_limit_period
+				if ($rule->whois_limit_amount !== null && $rule->whois_limit_period !== null)
+				{
+					// TODO : Ajouter ça.. si tant est que ce soit utile et pas redondant avec l'étape 2.
+					// si ca va pas continue;
+				}
+				// etape 2 : on vérifie que le dernier appel de ce candidat est inférieur a min_wait
+				if ($rule->min_wait !== null)
+				{
+					$tmp_date = (time() - strtotime($candidate->date));
+					if ($tmp_date <= $rule->min_wait);
+					// si ca va pas continue;
+				}
+				
+				// on a passé les règles on output cette ip candidate !
+				return $candidate->ip_source;
+			}
+			return null;
+		}
+		else
+		{
+			$candidate = $pool->fetch_object(); // on ne prend que le dernier.
+			return $candidate->ip_source;
+		}
+		
+	}
 }
 
 
@@ -83,41 +155,7 @@ class Repartiteur
 /*
 
 
-function get_candidate($server) 
-{
-    // selection d'un pool de sources candidates en triant par dernier candidat utilisé.
-    $req = "
-    select c.*, q.server, q.date FROM whois_candidates c LEFT JOIN whois_query q ON c.ip_source = q.source
-    WHERE 
-    q.id = (
-        SELECT max(id)
-        FROM whois_query
-        WHERE source = q.source AND server = ".$mysqli->real_escape_string($server)."
-    )
-    ORDER BY date ASC;
-    ";
-    $pool = mysqli->query($req);
-    
 
-    
-    // selection des regles associés au serveur de whois
-    $req = "SELECT * from whois_rate_limit WHERE whois_server = ".$mysqli->real_escape_string($server);
-    $rules = mysqli->query($req);
-    $rule = $rules->fetch_object();
-    
-    // vérification des rules pour chaque candidat. On sort dès qu'on en trouve un bon.
-    while ($candidate = $pool->fetch_object()) {
-
-        // etape 1 : on vérifie que pour ce candidat on a pas fait moins de whois_limit_amount dans la période de temps de whois_limit_period
-        
-        // etape 2 : on vérifie que le dernier appel de ce candidat est inférieur a min_wait
-        
-        
-        return $candidate->ip_source;
-    }
-    
-    return null;
-}
 
 */
 ?>
