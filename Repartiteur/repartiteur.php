@@ -111,7 +111,7 @@ class Repartiteur
 		
 		// selection des regles associés au serveur de whois
 		$req = "SELECT * from whois_rate_limit WHERE server = '".$this->mysqli->real_escape_string($server)."'";
-		print_r($req.PHP_EOL);
+		//print_r($req.PHP_EOL);
 		$rules = $this->mysqli->query($req);
 		if (($rule = $rules->fetch_object()) != null)
 		{		
