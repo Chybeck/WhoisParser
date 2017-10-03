@@ -157,7 +157,7 @@ class Socket extends AbstractAdapter
 			}
 			else $opts = array();
 			$context = stream_context_create($opts);
-            $this->sock = @stream_socket_client('tcp://' . $config['server'] . ':' . $config['port'], $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $context);
+            $this->sock = @stream_socket_client('tcp://' . $config['server'] . ':' . $config['port'], $errno, $errstr, 8, STREAM_CLIENT_CONNECT, $context);
         }
 
         if (! is_resource($this->sock)) {

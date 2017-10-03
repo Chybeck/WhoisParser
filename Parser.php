@@ -328,7 +328,8 @@ class Parser
         }
         
         $Config = $this->Config->getCurrent();
-				
+		
+		if (@!isset($Config['sortie']))	$Config['sortie'] = null;
 		// on va utiliser notre répartiteur !
 		if ($Config['sortie'] === null)
 		{
@@ -337,7 +338,7 @@ class Parser
 			$Config['sortie'] = $this->Repartiteur->get_candidate($server); 
 			if ($Config['sortie'] === null)
 			{
-				die('No moar candidates.');
+				die(json_encode(array('No moar candidates.')));
 			}
 			
 		}
@@ -357,7 +358,16 @@ class Parser
 		*/
 
         if ($Adapter instanceof AbstractAdapter) {
-            $this->rawdata = $Adapter->call($this->Query, $Config);
+			try {
+              $this->rawdata = $Adapter->call($this->Query, $Config);
+			}
+			catch (AbstractException $e)
+			{
+				$this->Repartiteur->action_suite_erreur ($Config['sortie'], $server);
+				$Config['sortie'] = $sortie = null;
+				$this->Config->setCurrent($Config);
+				$this->call();
+			}
             $this->parse();
         } else {
             throw new NoAdapterException('Adapter '. $Config['adapter'] .' could not be found');

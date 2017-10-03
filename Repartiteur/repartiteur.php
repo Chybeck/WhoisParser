@@ -58,7 +58,7 @@ class Repartiteur
 		   WHERE server = '".$this->mysqli->real_escape_string($server)."'
 		   GROUP BY source 
 		) q ON q.source = c.ip_source
-		WHERE date < NOW() OR date IS NULL
+		WHERE (date < NOW() OR date IS NULL) AND active = true
 		ORDER BY date ASC
 		LIMIT 1
 		";
@@ -77,12 +77,12 @@ class Repartiteur
 	}
 	
 
-	public function action_suite_erreur ($source, $server)
+	public function action_suite_erreur ($source, $server, $bl_time = 10)
 	{
 		$server = $this->mysqli->real_escape_string($server);
 		$source = $this->mysqli->real_escape_string($source);
 		// on va insérer un query correspondant à une date dans le futur de sorte à exclure cette source.
-		$req = "INSERT INTO whois_query (server, source, date) VALUES ('$server', '$source', NOW() + INTERVAL 10 MINUTE)";
+		$req = "INSERT INTO whois_query (server, source, date) VALUES ('$server', '$source', NOW() + INTERVAL $bl_time MINUTE)";
 		//print_r($req);
 		return $this->mysqli->query($req);
 	}
@@ -102,7 +102,7 @@ class Repartiteur
 		   WHERE server = '".$this->mysqli->real_escape_string($server)."'
 		   GROUP BY source 
 		) q ON q.source = c.ip_source
-		WHERE date < NOW() OR date IS NULL
+		WHERE (date < NOW() OR date IS NULL) AND active = true
 		ORDER BY date ASC
 		";
 		if (($pool = $this->mysqli->query($req)) === false) return null;
@@ -141,7 +141,9 @@ class Repartiteur
 		else
 		{
 			$candidate = $pool->fetch_object(); // on ne prend que le dernier.
-			return $candidate->ip_source;
+			if (isset($candidate->ip_source))
+			  return $candidate->ip_source;
+                        else return null;
 		}
 		
 	}
