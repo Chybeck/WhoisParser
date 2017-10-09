@@ -114,12 +114,14 @@ class Iana extends Regex
                 
                 if ($newConfig['server'] == '') {
                     $newConfig['server'] = $Result->whoisserver;
+		    if ($newConfig['server'] === 'whois.iana.org') $newConfig['server'] = 'whois.nic.'.$Query->tld;
                 }
             } else {
                 $mapping = $Config->get($Result->whoisserver);
                 $newConfig = $Config->get($mapping['template']);
             }
             
+
             if ($newConfig['server'] != '') {
                 $Result->reset();
                 $Config->setCurrent($newConfig);

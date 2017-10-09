@@ -317,18 +317,16 @@ class Parser
 	 */
     public function call($query = '')
     {
-		$this->attempt++;
-
-
+	$this->attempt++;
 		
-		if ($this->attempt > 5) throw new RateLimitException("STOP");
+	if ($this->attempt > 5) throw new RateLimitException("STOP");
 		
         if ($query != '') {
             $this->Query = filter_var($query, FILTER_SANITIZE_STRING);
         }
         
         $Config = $this->Config->getCurrent();
-		
+
 		if (@!isset($Config['sortie']))	$Config['sortie'] = null;
 		// on va utiliser notre répartiteur !
 		if ($Config['sortie'] === null)

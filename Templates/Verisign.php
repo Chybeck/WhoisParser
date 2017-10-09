@@ -104,8 +104,8 @@ class Verisign extends Regex
         if ($newConfig['server'] == '') {
             $newConfig['server'] = $ResultSet->whoisserver;
         }
-		$newConfig['sortie'] = $Config->current['sortie'];
-        
+		//$newConfig['sortie'] = $Config->current['sortie'];
+        $newConfig['sortie'] = null;
         $Config->setCurrent($newConfig);
         $WhoisParser->call();
     }
