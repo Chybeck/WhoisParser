@@ -336,6 +336,13 @@ class Result extends AbstractResult
         $this->lastId = - 1;
     }
 
+    public function array_map_recursive(callable $func, array $arr) {
+      array_walk_recursive($arr, function(&$v) use ($func) {
+        $v = $func($v);
+      });
+      return $arr;
+    }
+
     /**
      * Convert properties to json
      * 
@@ -343,7 +350,12 @@ class Result extends AbstractResult
      */
     public function toJson()
     {
-        return json_encode($this->toArray(), JSON_PRETTY_PRINT);
+        if (($moo = json_encode($this->toArray(), JSON_PRETTY_PRINT)) === false)
+	{
+	  $utfEncodedArray = $this->array_map_recursive("utf8_encode", $this->toArray() );
+	  return  json_encode($utfEncodedArray, JSON_PRETTY_PRINT);
+        }
+	else return $moo;
     }
 
     /**

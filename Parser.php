@@ -261,7 +261,6 @@ class Parser
 		
         // call cleanUp method
         $this->Result->cleanUp($this->Config->getCurrent(), $this->dateformat);
-        
         // peparing output of Result by format
         switch ($this->format) {
             case 'json':
@@ -324,9 +323,7 @@ class Parser
         if ($query != '') {
             $this->Query = filter_var($query, FILTER_SANITIZE_STRING);
         }
-        
         $Config = $this->Config->getCurrent();
-
 		if (@!isset($Config['sortie']))	$Config['sortie'] = null;
 		// on va utiliser notre répartiteur !
 		if ($Config['sortie'] === null)
@@ -426,10 +423,8 @@ class Parser
             if (! isset($this->Result->whoisserver)) {
                 $this->Result->addItem('whoisserver', $Config['server']);
             }
-            
             // start post processing
             $Template->postProcess($this);
-            
             // set name to Result
             if (isset($this->Query->tld) && ! isset($this->Query->fqdn)) {
                 $this->Result->addItem('name', $this->Query->tld);
