@@ -74,7 +74,7 @@ class Br extends Regex
      * @var string
      * @access protected
      */
-    protected $available = '/(No match for domain|release process: reserved)/i';
+    protected $available = '/(% No match for|release process: reserved)/i';
 
 
     public function translateRawData($rawdata, $Config = null)
