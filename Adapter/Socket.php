@@ -76,9 +76,13 @@ class Socket extends AbstractAdapter
         if  (is_object($query)) {
             if (isset($query->tld) && ! isset($query->idnFqdn)) {
                 $lookupString = str_replace('%domain%', $query->tld, $config['format']);
-            } elseif (isset($query->ip)) {
+            } elseif (isset($query->ip) && $config['server'] == 'whois.iana.org') {
                 $lookupString = str_replace('%domain%', $query->ip, $config['format']);
-            } elseif (isset($query->asn)) {
+            }
+	    elseif (isset($query->ip)) {
+                $lookupString = str_replace('%domain%', $query->ip.' -B', $config['format']);
+            }
+	    elseif (isset($query->asn)) {
                 $lookupString = str_replace('%domain%', $query->asn, $config['format']);
             } else {
                 $lookupString = str_replace('%domain%', $query->idnFqdn, $config['format']);
