@@ -72,7 +72,7 @@ class Config
     public function __construct($specialWhois = array(), $customIni = null)
     {
         if (empty($this->config)) {
-            $this->config = parse_ini_file('whois.ini');
+            $this->config = @parse_ini_file('whois.ini');
             if (strlen($customIni)) {
                 $this->customConfig = parse_ini_file($customIni);
             }
