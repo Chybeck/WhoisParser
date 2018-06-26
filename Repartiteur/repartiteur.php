@@ -1,5 +1,8 @@
 <?php
+
 namespace Novutec\WhoisParser;
+
+use Novutec\WhoisParser\DbConfig;
 
 class Repartiteur
 {
@@ -14,7 +17,11 @@ class Repartiteur
 	
 	  function __construct()
 	  {
-		 include_once("./config.inc.php");
+
+		 $db_ip = DbConfig::$db_ip;
+		 $db_login = DbConfig::$db_login;
+		 $db_pass = DbConfig::$db_pass;
+		 $db_database = DbConfig::$db_database;
 		 $this->mysqli = new \mysqli($db_ip, $db_login, $db_pass, $db_database);
 	  }
 	  
