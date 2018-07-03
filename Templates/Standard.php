@@ -94,7 +94,7 @@ class Standard extends KeyValue
         'contacts:billing:email' => '/^Billing(\-| )(Contact )?(Email|E-Mail)$/i',
     );
 
-    protected $available = '/(^NOT FOUND\n|^No Data Found\n|Status: free|No match|No Object Found|Domain not found|Domain Status: Available)/i';
+    protected $available = '/(^NOT FOUND\n|^No Data Found\n|^The queried object does not exist\n|Status: free|No match|No Object Found|Domain not found|Domain Status: Available)/i';
 
     protected $rateLimit = '/(exceeded the maximum allowable|exceeded your query limit)/i';
 
