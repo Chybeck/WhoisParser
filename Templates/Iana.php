@@ -95,6 +95,8 @@ class Iana extends Regex
         $Result = $WhoisParser->getResult();
         $Config = $WhoisParser->getConfig();
         $Query = $WhoisParser->getQuery();
+
+	if ($Result->name == null) $Result->registered = null;
         
         if ($Result->dnssec != '') {
             $Result->dnssec = true;
@@ -121,7 +123,6 @@ class Iana extends Regex
                 $newConfig = $Config->get($mapping['template']);
             }
             
-
             if ($newConfig['server'] != '') {
                 $Result->reset();
                 $Config->setCurrent($newConfig);
