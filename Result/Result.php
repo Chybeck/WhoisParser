@@ -523,7 +523,7 @@ class Result extends AbstractResult
         }
         
         // format dates
-        $this->template[$this->whoisserver] = $config['template'];
+        //$this->template[$this->whoisserver] = $config['template'];
         $this->changed = $this->formatDate($dateformat, $this->changed);
         $this->created = $this->formatDate($dateformat, $this->created);
         $this->expires = $this->formatDate($dateformat, $this->expires);
