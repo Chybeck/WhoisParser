@@ -55,8 +55,8 @@ class At extends Regex
     protected $blockItems = array(
             1 => array('/nserver:(?>[\x20\t]*)(.+)$/im' => 'nameserver', 
                     '/remarks:(?>[\x20\t]*)(.+)$/im' => 'ips', 
-                    '/_mnt-by:(?>[\x20\t]*)(.+)$/im' => 'registrar:id', 
                     '/changed:(?>[\x20\t]*)(.+)$/im' => 'changed', 
+		    '/^registrar:(?>[\x20\t]*)(.+)\s\(/im' => 'registrar:name',
                     '/registrant:(?>[\x20\t]*)(.+)$/im' => 'network:contacts:owner', 
                     '/admin-c:(?>[\x20\t]*)(.+)$/im' => 'network:contacts:admin', 
                     '/tech-c:(?>[\x20\t]*)(.+)$/im' => 'network:contacts:tech', 

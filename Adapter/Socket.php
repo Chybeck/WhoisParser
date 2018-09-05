@@ -80,7 +80,8 @@ class Socket extends AbstractAdapter
                 $lookupString = str_replace('%domain%', $query->ip, $config['format']);
             }
 	    elseif (isset($query->ip)) {
-                $lookupString = str_replace('%domain%', $query->ip.' -B', $config['format']);
+//                $lookupString = str_replace('%domain%', $query->ip.' -B', $config['format']);
+                $lookupString = str_replace('%domain%', $query->ip, $config['format']);
             }
 	    elseif (isset($query->asn)) {
                 $lookupString = str_replace('%domain%', $query->asn, $config['format']);

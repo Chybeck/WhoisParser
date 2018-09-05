@@ -217,7 +217,6 @@ class Parser
                     $config = $this->Config->get('iana');
                 }
             }
-			
 			/* on va utiliser notre répartiteur !
 			if ($sortie === null)
 			{

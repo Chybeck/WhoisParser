@@ -30,7 +30,8 @@ class Repartiteur
 		
 	/* 
 	CREATE TABLE `whois_query` (
-	  `id` int(11) NOT NULL,
+	  `id` int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	  `ip` VARCHAR(45) DEFAULT NULL,
 	  `server` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
 	  `source` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
 	  `date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -55,6 +56,17 @@ class Repartiteur
 	
 	public function get_candidate_easy($server) 
 	{
+		
+		// antispam, 1000 whois par heure max, sinon pas de candidats éligibles.
+		if (isset($_SERVER['REMOTE_ADDR']))
+		{	
+		 $req = "select count(ip) as total FROM whois_query WHERE ip = '".$_SERVER['REMOTE_ADDR']."' AND date >= now() - INTERVAL 1 HOUR GROUP BY ip";
+		 $sql = $this->mysqli->query($req);
+		 if (!$sql) return null;
+		 $rate = $sql->fetch_object();
+		 if ($rate->total > 1000) return null;
+		}
+		
 		// selection d'un candidat en prenant le dernier utilisé pour ce serveur de whois.
 		$req = "	
 		SELECT * 
@@ -73,13 +85,25 @@ class Repartiteur
 		$sql = $this->mysqli->query($req);
 		if (!$sql) return null;
 		if (($candidate = $sql->fetch_object()) !== null)
-			return $candidate->ip_source;
+		{
+			// on a un candidat on va quand meme s'assurer qu'il est ok.
+			// antispam le meilleur candidat ne doit pas avoir été sollicité plus de 100 fois dans la minute tout demandeur confondus.
+						
+			 $req = "select count(ip) as total FROM whois_query WHERE source = '".$candidate->ip_source."' AND date >= now() - INTERVAL 1 MINUTE GROUP BY ip";
+			 $sql = $this->mysqli->query($req);
+			 if (!$sql) return null;
+			 $rate = $sql->fetch_object();
+			 if ($rate->total > 100) return null;
+			 else return $candidate->ip_source;
+		}
 		else return null;
 	}
 	
 	public function log_query($source, $server)
 	{
-			$req = "INSERT into `whois_query` (source, server) VALUES ('".$this->mysqli->real_escape_string($source)."', '".$this->mysqli->real_escape_string($server)."')";
+		    if (isset($_SERVER['REMOTE_ADDR'])) $ip = $_SERVER['REMOTE_ADDR']; else $ip = "NULL";
+			$req = "INSERT into `whois_query` (ip, source, server) VALUES ('".$ip."', '".$this->mysqli->real_escape_string($source)."', '".$this->mysqli->real_escape_string($server)."')";
+			$req = str_replace('\'NULL\'', 'NULL', $req);
 			return $this->mysqli->query($req);
 	}
 	
