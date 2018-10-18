@@ -1,7 +1,6 @@
 <?php
-
 namespace Novutec\WhoisParser;
-
+error_reporting(E_ALL);
 use Novutec\WhoisParser\DbConfig;
 
 class Repartiteur
@@ -56,7 +55,6 @@ class Repartiteur
 	
 	public function get_candidate_easy($server) 
 	{
-		
 		// antispam, 1000 whois par heure max, sinon pas de candidats éligibles.
 		if (isset($_SERVER['REMOTE_ADDR']))
 		{	
@@ -81,7 +79,6 @@ class Repartiteur
 		ORDER BY date ASC
 		LIMIT 1
 		";
-		//print_r($req);
 		$sql = $this->mysqli->query($req);
 		if (!$sql) return null;
 		if (($candidate = $sql->fetch_object()) !== null)
@@ -93,8 +90,9 @@ class Repartiteur
 			 $sql = $this->mysqli->query($req);
 			 if (!$sql) return null;
 			 $rate = $sql->fetch_object();
-			 if ($rate->total > 100) return null;
-			 else return $candidate->ip_source;
+			 if($rate === null && isset($candidate->ip_source)) return $candidate->ip_source;
+			 elseif ($rate->total > 100) return null;
+			 elseif($candidate->ip_source) return $candidate->ip_source;
 		}
 		else return null;
 	}

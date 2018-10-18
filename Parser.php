@@ -329,7 +329,7 @@ class Parser
 		{
 			$server = $Config['server'];
 			//print_r("SELECTION CANDIDAT");
-			$Config['sortie'] = $this->Repartiteur->get_candidate($server); 
+			$Config['sortie'] = $this->Repartiteur->get_candidate_easy($server); 
 			if ($Config['sortie'] === null)
 			{
 				die(json_encode(array('No moar candidates.')));
