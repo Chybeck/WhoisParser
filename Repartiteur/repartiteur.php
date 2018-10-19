@@ -62,7 +62,8 @@ class Repartiteur
 		 $sql = $this->mysqli->query($req);
 		 if (!$sql) return null;
 		 $rate = $sql->fetch_object();
-		 if ($rate->total > 1000) return null;
+		 if ($rate !== null)
+		   if ($rate->total > 1000) return null;
 		}
 		
 		// selection d'un candidat en prenant le dernier utilisé pour ce serveur de whois.

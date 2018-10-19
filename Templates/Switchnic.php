@@ -43,8 +43,12 @@ class Switchnic extends Regex
 	 * @var array
 	 * @access protected
 	 */
-    protected $blocks = array(1 => '/holder of domain name:\n(.*?)(?=contractual language)/is', 
-            2 => '/technical contact:\n(.*?)(?=dnssec)/is', 3 => '/dnssec:(.*?)(?=name servers)/is', 
+    protected $blocks = array(
+	    1 => '/holder of domain name:\n(.*?)(?=(contractual language|Technical contact:))/is', 
+            2 => '/technical contact:\n(.*?)(?=\n\n)/is',
+	    5 => '/Registrar:\n(.*?)(?=\n\n)/is',
+            6 => '/First registration date:\n(.*?)(?=\n\n)/is',
+	    3 => '/dnssec:(.*?)(?=name servers)/is',
             4 => '/name servers:\n(.*?)$/is');
 
     /**
@@ -56,6 +60,8 @@ class Switchnic extends Regex
     protected $blockItems = array(
             1 => array('/holder of domain name:\n(.*)$/is' => 'contacts:owner:address'), 
             2 => array('/technical contact:\n(.*?)$/is' => 'contacts:tech:address'), 
+	    5 => array('/Registrar:\n(.*)$/is' => 'registrar:name'),
+	    6 => array('/First registration date:\n(.*)$/is' => 'created'),
             3 => array('/dnssec:(?>[\x20\t]*)(.+)$/im' => 'dnssec'), 
             4 => array('/\n(?>[\x20\t]*)(.+)$/im' => 'nameserver', 
                     '/\n(?>[\x20\t]*)(.+)(?>[\x20\t]*)\[.+\]$/im' => 'nameserver', 
@@ -67,9 +73,8 @@ class Switchnic extends Regex
      * @var string
      * @access protected
      */
-    protected $available = '/We do not have an entry in our database matching your query/i';
-	
-	protected $rateLimit = '/The number of requests per client per time interval is\nrestricted. You have exceeded this limit.\nPlease wait a moment and try again.\n\n/';
+    protected $available = '/We do not have an entry in our database matching your query/i';	
+    protected $rateLimit = '/The number of requests per client per time interval is\nrestricted. You have exceeded this limit.\nPlease wait a moment and try again.\n\n/';
 
     /**
      * After parsing ...
@@ -108,6 +113,12 @@ class Switchnic extends Regex
                         $contactObject->country = $filteredAddress[4];
                         $contactObject->city = $filteredAddress[3];
                         $contactObject->address = $filteredAddress[2];
+                        break;
+                    case 4:
+                        $contactObject->name = $filteredAddress[0];
+                        $contactObject->country = $filteredAddress[3];
+                        $contactObject->city = $filteredAddress[2];
+                        $contactObject->address = $filteredAddress[1];
                         break;
                     default:
                         //do nothing.
