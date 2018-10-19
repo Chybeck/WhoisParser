@@ -1,6 +1,5 @@
 <?php
 namespace Novutec\WhoisParser;
-error_reporting(E_ALL);
 use Novutec\WhoisParser\DbConfig;
 
 class Repartiteur
