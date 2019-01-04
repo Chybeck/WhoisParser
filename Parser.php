@@ -43,6 +43,7 @@ use Novutec\WhoisParser\Exception\NoTemplateException;
 use Novutec\WhoisParser\Exception\RateLimitException;
 use Novutec\WhoisParser\Result\Result;
 use Novutec\WhoisParser\Templates\Type\AbstractTemplate;
+use Novutec\WhoisParser\Exception\CandidateException;
 
 /**
  * WhoisParser
@@ -332,7 +333,7 @@ class Parser
 			$Config['sortie'] = $this->Repartiteur->get_candidate_easy($server); 
 			if ($Config['sortie'] === null)
 			{
-				die(json_encode(array('No moar candidates.')));
+			    throw new CandidateException('No more candidates');
 			}
 			
 		}
