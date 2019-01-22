@@ -59,7 +59,7 @@ class Br extends Regex
                     '/^tech-c:(?>[\x20\t]*)(.+)$/im' => 'network:contacts:tech', 
                     '/^billing-c:(?>[\x20\t]*)(.+)$/im' => 'network:contacts:zone', 
                     '/^nserver:(?>[\x20\t]*)(.+)$/im' => 'nameserver', 
-                    '/^created:(?>[\x20\t]*)(.+)$/im' => 'created', 
+                    '/^created:(?>[\x20\t]*)([0-9]+)/im' => 'created', 
                     '/^expires:(?>[\x20\t]*)(.+)$/im' => 'expires', 
                     '/^changed:(?>[\x20\t]*)(.+)$/im' => 'changed'), 
             2 => array('/^nic-hdl-br:(?>[\x20\t]*)(.+)$/im' => 'contacts:handle', 
