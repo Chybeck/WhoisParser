@@ -74,7 +74,7 @@ class Switchnic extends Regex
      * @access protected
      */
     protected $available = '/We do not have an entry in our database matching your query/i';	
-    protected $rateLimit = '/The number of requests per client per time interval is\nrestricted. You have exceeded this limit.\nPlease wait a moment and try again.\n\n/';
+    protected $rateLimit = '/(The number of requests per client per time interval is\nrestricted\. You have exceeded this limit\.\nPlease wait a moment and try again\.|Requests of this client are not permitted\.)/';
 
     /**
      * After parsing ...
